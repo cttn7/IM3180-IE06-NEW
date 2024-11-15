@@ -1,0 +1,14 @@
+this labelled dataset is taken from Kaggle: Sarcastic Comments - REDDIT
+for the BERT embedding process
+https://www.kaggle.com/datasets/sherinclaudia/sarcastic-comments-on-reddit?resource=download
+we used this to perform embedding since the sarcasm label is balanced and it is very big
+our self-labelled datasets are skewed towards non-sarcastic
+DISCLAIMER there may be NSFW subreddit topics inside the dataset!
+
+when downloaded, it will be in a zip called 'archive'
+extracting it reveals an excel file called 'train-balanced-sarcasm'
+we did not include it as the file is very large (>100mb) but can be downloaded from the Kaggle site
+
+when filtered to only comments with 'politic' topic = 40000+ comments (politics-only-topic)
+
+the -2000, -5000 in the other csv files are the number of comments sampled from the original dataset. 
