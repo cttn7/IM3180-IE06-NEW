@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Issue Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        main{
+            background-image: url('../assets/images/saveResponse.png');
+        }
+
+        #savedboard2 {
+        padding: 20px;
+        background-color: #f4f4f4;
+        height: 100vh;/* Full height viewport */
+    }
+    .savedboard {
+        display: flex;
+        flex-wrap: wrap;
+        width:100%;
+        gap: 20px;
+    }
+    .button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    margin-left: 10px;
+    cursor: pointer;
+}
+    .savedboard-items {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 20px;
+        max-height: 600px; /* You can adjust the height as needed */
+        overflow-y: auto; /* Enables vertical scroll */
+        padding-right: 10px; /* Add some padding for scroll visibility */
+    }
+    .savedboard-items .item {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        flex: 1 1 calc(16.66%- 40px); /* Set flexible width with a min size */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        
+    }
+
+        /* Responsive design for smaller screens */
+    @media (max-width: 1200px) {
+        .savedboard-items .item {
+            flex: 1 1 calc(25% - 40px); /* Adjust to 4 items per row for medium screens */
+        }
+    }
+
+    @media (max-width: 600px) {
+        .savedboard-items .item {
+            flex: 1 1 calc(50% - 40px); /* Full width for 2 item on small screens */
+        }
+    }
+    </style>
+</head>
+<body class="savedResponse-page">
+    <header class="savedResponse-header">
+        <nav>
+            <div class="logo">
+                <img src="assets/images/mouse1.png" alt="mouse1Image">
+            </div>
+            <ul>
+                <li><a href="dashboard.html">
+                    <img src="assets/images/dashboardIcon.png" alt="dashboardIcon">
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="savedResponse.html">
+                    <img src="assets/images/analyzeIcon.png" alt="analyzeIcon">
+                    <span>Saved Responses</span></a></li>
+                <li><a href="index.html">
+                    <img src="assets/images/homeIcon.png" alt="homeIcon">
+                    <span>Home</span>
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+<main>
+
+    
+
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Saved Posts</h1>
+        </div>
+    </section>
+
+    <section id="savedboard2">
+        <div class="savedboard`" >
+        <h1>Saved Responses</h1>
+        <button class="button" id="clear-responses" >CLEAR POSTS</button>
+        <div id="response-list" class="savedboard-items"></div>
+        </div>
+    <!-- Viewed items will be inserted here -->
+        
+        
+        
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2>About This Project</h2>
+            <p>This project addresses and focuses on social issues across social media platforms.</p>
+        </div>
+    </section>
+</main>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Trending Social Issues. All rights reserved.</p>
+        </div>
+    </footer>
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Get the element where we want to display the saved responses
+            const responseList = document.getElementById('response-list');
+    
+            function displayPosts(viewedItems) {
+                responseList.innerHTML = ''; // Clear previous content in white box 
+                // Check if there are any viewed items to display
+                if (viewedItems.length === 0) {
+                    responseList.innerHTML = '<p>No responses recorded.</p>';
+                } else {
+                    // Create HTML for each viewed item
+                    viewedItems.forEach(obj => {
+                        const selectedPostId = obj.id;
+                        const dateViewed = obj.timestamp;
+                        console.log("Selected Post ID:", selectedPostId); // Debugging
+    
+                        fetch(`http://localhost:3000/posts/${selectedPostId}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Post not found');
+                                }
+                                return response.json();
+                            })
+                            .then(item => {
+                                // Create HTML structure for each image item
+                                const imageContainer = document.createElement('div');
+                                imageContainer.className = 'image-card'; // Assign a className for CSS styles
+                                imageContainer.innerHTML = `
+                                    <a href="dashboard.html" style="text-decoration: none; color: inherit;" onclick="localStorage.setItem('selectedPostId', ${item.id})">
+                                        <h3>${item.title}</h3>
+                                        <img src="${item.image_path}" alt="${item.title}" style="max-width: 100%; height: auto;">
+                                        <p>${item.summary}</p>
+                                        <h4>${dateViewed}</h4>
+                                    </a>
+                                `;
+                                responseList.appendChild(imageContainer);
+                            })
+                            .catch(err => {
+                                console.error('Error fetching data:', err);
+                                const errorDiv = document.createElement('div');
+                                errorDiv.innerHTML = '<p>Error loading data for post ' + selectedPostId + '</p>';
+                                responseList.appendChild(errorDiv);
+                            });
+                    });
+                }
+            }
+    
+            // Load saved responses from localStorage when the page is loaded
+            let viewedItems = JSON.parse(localStorage.getItem('viewedItems')) || [];
+            displayPosts(viewedItems);  
+    
+            // Clear saved responses when the clear button is clicked
+            const clearButton = document.getElementById('clear-responses');
+            clearButton.addEventListener('click', function() {
+                // Clear viewedItems from localStorage
+                localStorage.removeItem('viewedItems');
+                viewedItems = []; // Clear the local variable as well
+                // Update the display
+                displayPosts(viewedItems); // Call displayPosts with the updated empty array
+            });
+        });
+    </script>
+</body>    

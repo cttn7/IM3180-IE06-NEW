@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Issue Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-image: url('../assets/images/saveResponse.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center top;
+        }
+
+        .saveButton {
+        padding: 10px 15px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        margin-left: 10px;
+        cursor: pointer;
+        width:150px;
+        }
+
+        #dashboard2 {
+            display: grid;
+            grid-template-columns: 70% 30%; /* 70% for left, 30% for right */
+            gap: 20px; /* Adds space between grid items */
+            padding: 20px;
+        }
+
+        #about-container {
+            grid-column: 1 / -1; /* Full-width within grid */
+            margin-top: 20px;
+        }
+
+        #left-quarter {
+        position: relative;
+        overflow: hidden; /* Prevents the zoomed image from overflowing the container */
+        max-width: 100%; /* Adjust based on container size */
+        }
+        
+        .graph-image{
+            position: relative;
+            align-items: center;
+            max-width: 100%;
+            padding: 20px;
+            overflow: auto;
+            height: auto;
+      
+        }
+
+        #graph-img {
+        transition: transform 0.3s ease-in-out; /* Smooth zooming */
+        max-width: 100%;
+        height: auto;
+        transform-origin: top left; /* Ensure zooming starts from the top left */
+        object-fit: contain; /* Keeps the aspect ratio of the image */
+        }
+
+        .quarter {
+            background-color: #f4f4f4; /* Light gray background for each quarter */
+            padding: 20px;
+            border: 1px solid #ddd; /* Light border */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        .post-block {
+            background-color: #fff; /* White background */
+            border: 1px solid #b97c7c; /* Your desired border color */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            margin: 10px 0; /* Space between posts */
+            padding: 15px; /* Inner spacing */
+            transition: transform 0.2s; /* Animation for hover effect */
+        }
+
+        .post-block:hover {
+            transform: scale(1.02); /* Slight zoom on hover */
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            #dashboard2 {
+                grid-template-columns: 1fr; /* Stack in a single column on small screens */
+            }
+
+
+            /* Adjust for smaller screens */
+@media (max-width: 600px) {
+    #excel-container {
+        padding: 5px;              /* Reduced padding on smaller screens */
+        max-height: 200px;         /* Optional: Adjust height for small screens */
+    }
+
+    table {
+        font-size: 12px;           /* Optional: Reduce font size for better fitting */
+    }
+}
+
+    #excel-container {
+    max-width: 100%;           /* Ensure container doesn't exceed page width */
+    max-height: 300px;         /* Limit height and allow scrolling if needed */
+    overflow-y: auto;          /* Enables vertical scrolling */
+    overflow-x: auto;          /* Enables horizontal scrolling */
+    padding: 10px;
+    border: 1px solid #ddd;    /* Optional border for better visual separation */
+    background-color: #f9f9f9; /* Light background color */
+    display: block;
+}
+table {
+    width: 100%;               /* Allows table to occupy full container width */
+    border-collapse: collapse;
+    table-layout: fixed;       /* Fixes table layout for consistent column widths */
+}
+th, td {
+    white-space: nowrap;       /* Prevents cell content from wrapping */
+    text-align: left;          /* Aligns content to the left for readability */
+}
+        }
+    </style>
+</head>
+<body class="dashboard-page">
+    <audio id="backgroundMusic" loop autoplay>
+        <source src="music/bgsound.WAV" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+    <header class="dashboard-header">
+        <nav>
+            <div class="logo">
+                <img src="assets/images/mouse1.png" alt="mouse1Image">
+            </div>
+            <ul>
+                <li>
+                    <button id="muteButton">
+                        <img id="speakerIcon" src="assets/images/speaker-on.png" alt="Speaker Icon" width="20" height="20">
+                    </button>
+                </li>
+                <li><a href="dashboard.html">
+                    <img src="assets/images/dashboardIcon.png" alt="dashboardIcon">
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="savedResponse.html">
+                    <img src="assets/images/analyzeIcon.png" alt="analyzeIcon">
+                    <span>Saved Responses</span></a></li>
+                <li><a href="index.html">
+                    <img src="assets/images/homeIcon.png" alt="homeIcon">
+                    <span>Home</span>
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero">
+            <div class="hero-content">
+                <h1>Dashboard</h1>
+            </div>
+        </section>
+    
+        <section id="dashboard2">
+            <div class="quarter" id="left-quarter">
+                <h2>Post Details</h2>
+                <p>Content for the left quarter will be populated here.</p>
+            </div>
+            <div class="quarter">
+                <h2>Other Posts</h2>
+                <div id="recent-posts-container" class="scrollable">
+                    <!-- Posts will be dynamically loaded here -->
+                </div>
+            </div>
+            <div id="excel-container" class="quarter">
+                <h2>Download Full version of Post Data in excel here</h2>
+                <button id="download-excel-button">Download Excel</button>
+                <p>Preview of the data and analysis</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Trending Social Issues. All rights reserved.</p>
+        </div>
+    </footer>
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    
+    <script>
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+        table.style.tableLayout = 'auto'; // Fixes column widths for a uniform look
+    
+        excelData.slice(0, maxRows).forEach((row, rowIndex) => {
+            const tr = document.createElement('tr');
+    
+            // Style for header row
+            if (rowIndex === 0) {
+                row.forEach(cell => {
+                    const th = document.createElement('th');
+                    th.textContent = cell;
+                    th.style.border = '1px solid #ddd';
+                    th.style.padding = '8px';
+                    th.style.backgroundColor = '#f2f2f2';
+                    th.style.width = '150px'; // Optional: Adjust column width as needed
+                    tr.appendChild(th);
+                });
+            } else {
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    td.style.border = '1px solid #ddd';
+                    td.style.padding = '8px';
+                    td.style.wordWrap = 'break-word';
+                    tr.appendChild(td);
+                });
+            }
+    
+            table.appendChild(tr);
+        });
+    
+        document.getElementById('excel-container').appendChild(table);
+    </script>
+    
+    <script>
+        const postId = localStorage.getItem('selectedPostId');
+        console.log("Selected Post ID:", postId);
+    
+        if (postId) {
+            fetch(`http://localhost:3000/posts/${postId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.excel) {
+                        document.getElementById('download-excel-button').addEventListener('click', () => {
+                            window.location.href = data.excel;
+                        });
+    
+                        fetch(data.excel)
+                            .then(response => response.arrayBuffer())
+                            .then(buffer => {
+                                const workbook = XLSX.read(buffer, { type: 'array' });
+                                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                                const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    
+                                // Display only the first 50 rows in #excel-container
+                                const maxRows = 30;
+                                const table = document.createElement('table');
+                                table.style.width = '100%';
+                                table.style.borderCollapse = 'collapse';
+    
+                                excelData.slice(0, maxRows).forEach((row, rowIndex) => {
+                                    const tr = document.createElement('tr');
+    
+                                    // Style for the header row
+                                    if (rowIndex === 0) {
+                                        row.forEach(cell => {
+                                            const th = document.createElement('th');
+                                            th.textContent = cell;
+                                            th.style.border = '1px solid #ddd';
+                                            th.style.padding = '8px';
+                                            th.style.backgroundColor = '#f2f2f2';
+                                            tr.appendChild(th);
+                                        });
+                                    } else {
+                                        row.forEach(cell => {
+                                            const td = document.createElement('td');
+                                            td.textContent = cell;
+                                            td.style.border = '1px solid #ddd';
+                                            td.style.padding = '8px';
+                                            td.style.wordWrap = 'break-word'; // Ensures text wraps
+                                            tr.appendChild(td);
+                                        });
+                                    }
+    
+                                    table.appendChild(tr);
+                                });
+    
+                                document.getElementById('excel-container').appendChild(table);
+                            })
+                            .catch(error => console.error('Error loading Excel file:', error));
+                    } else {
+                        console.error('Excel file URL not found in post data.');
+                    }
+                })
+                .catch(error => console.error('Error fetching post data:', error));
+        } else {
+            alert('No post selected. Please select a post to view its data.');
+        }
+    </script>
+
+
+
+    <script>
+        // Function to fetch recent posts
+        // Function to fetch recent posts
+function fetchRecentPosts() {
+    const selectedPostId = localStorage.getItem('selectedPostId'); // Get selected post ID
+    console.log("Selected Post ID:", selectedPostId); // Debugging
+
+    fetch('http://localhost:3000/posts') // Update this endpoint as necessary
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Fetched posts:', data); // Log the fetched posts
+            const recentPostsContainer = document.getElementById('recent-posts-container');
+            recentPostsContainer.innerHTML = ''; // Clear previous content
+
+            if (data.length > 0) {
+                // Filter out the selected post
+                const filteredPosts = data.filter(item => item.id !== parseInt(selectedPostId));
+
+                if (filteredPosts.length > 0) {
+                    filteredPosts.forEach(item => {
+                        const postItem = document.createElement('div');
+                        postItem.classList.add('post-item');
+
+                        postItem.innerHTML = `
+                            <div class="post-block">
+                                <a href="dashboard.html" style="text-decoration: none; color: inherit;" onclick="localStorage.setItem('selectedPostId', ${item.id})">
+                                    <h3>${item.title}</h3>
+                                    <img src="${item.image_path}" alt="${item.title}" style="max-width: 100%; height: auto;">
+                                    <p>${item.summary}</p>
+                                </a>
+                            </div>
+                        `;
+
+                        recentPostsContainer.appendChild(postItem);
+                    });
+                } else {
+                    recentPostsContainer.innerHTML = '<p>No other recent posts available.</p>';
+                }
+            } else {
+                recentPostsContainer.innerHTML = '<p>No recent posts available.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching recent posts:', error);
+            document.getElementById('recent-posts-container').innerHTML = '<p>Error fetching recent posts. Please try again later.</p>';
+        });
+}
+
+    
+        // Call the function to load recent posts
+        fetchRecentPosts();
+    </script>
+    
+    
+    
+   
+    <!-- Add your script here -->
+       <!-- Add your script here -->
+       <script>
+        // Function to get the selected post ID from localStorage
+        const selectedPostId = localStorage.getItem('selectedPostId');
+        console.log("Selected Post ID:", selectedPostId); // Debugging
+
+        // Check if a post ID is available
+        if (!selectedPostId) {
+            console.error('No post ID found in localStorage.');
+            document.getElementById('left-quarter').innerHTML = '<p>No post selected. Please select a post to view details.</p>';
+        } else {
+            // Fetch post details from the API
+            fetch(`http://localhost:3000/posts/${selectedPostId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) {
+                        document.getElementById('left-quarter').innerHTML = '<p>Post not found.</p>';
+                    } else {
+                        // Populate the left quarter with post details
+                        const leftQuarter = document.getElementById('left-quarter');
+                        leftQuarter.innerHTML = `
+                            <button class="saveButton" id="save-button" >SAVE POST</button>
+                            <h2>${data.title || 'No title available'}</h2>
+                            <img src="${data.image_path || 'assets/images/default-image.jpg'}" alt="${data.title}" style="max-width: 100%; height: auto;">
+                            <p><strong>Description:</strong> ${data.description || 'No description available.'}</p>
+                            <p><strong>Link to original post:</strong> <a href="${data.link}" target="_blank">${data.link || 'No link available'}</a></p>
+                            <p><strong>Summary:</strong> ${data.summary || 'No summary available.'}</p>
+                            <h3>Top Comments</h3>
+                            <p>${data.topcomment || 'No top comment available.'}</p>
+                            <h3>Negative Comments</h3>
+                            <p>${data.negative || 'No negative comments available.'}</p>
+                            <h3>Positive Comments</h3>
+                            <p>${data.positive || 'No positive comments available.'}</p>
+                            <h3>Neutral Comments</h3>
+                            <p>${data.neutral || 'No neutral comments available.'}</p>
+                            <h3>Graph</h3>
+                            <p>AI learning model analytics</p>
+                            <div style="text-align: center;">
+                                <button id="zoom-in" style="margin-right: 10px;">+</button>
+                                <button id="zoom-out">-</button>
+                            </div>
+                            <div class="graph-image" >
+                            <img id="graph-img" src="${data.graph_path || 'assets/graphs/default-image.jpg'}" alt="${data.title}" style="max-width: 100%; height: auto;">
+                            </div>
+                        `;
+
+                        // Add Chatbot iframe if chatbot_url is available
+                    if (data.chatbot_url) {
+                        const chatbotContainer = document.createElement('iframe');
+                        chatbotContainer.src = data.chatbot_url;
+                        chatbotContainer.width = '100%';
+                        chatbotContainer.height = '500px'; // Adjust height as needed
+                        chatbotContainer.style.border = 'none';
+                        document.querySelector('.graph-image').appendChild(chatbotContainer);
+                    }
+
+                        initZoomFunctionality();
+                        initSaveFunction();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching post details:', error);
+                    document.getElementById('left-quarter').innerHTML = '<p>Error fetching details. Please try again later.</p>';
+                });
+        }
+
+        // Record the date and time of the user viewing this item
+        function initSaveFunction(){
+            const saveButton = document.getElementById('save-button');
+            saveButton.addEventListener('click', () => {
+                const now = new Date().toISOString(); // Get the current date/time
+
+                // Create an object to represent the viewed item and timestamp
+                const viewedItem = {
+                id: selectedPostId,
+                timestamp: now,
+                };
+
+                // Retrieve any previous view records from localStorage
+                let viewedItems = JSON.parse(localStorage.getItem('viewedItems')) || [];
+
+                // Add the current viewed item to the array
+                viewedItems.push(viewedItem);
+
+                // Save the updated viewed items back to localStorage
+                localStorage.setItem('viewedItems', JSON.stringify(viewedItems));
+            });
+        }
+
+        function initZoomFunctionality() {
+            let zoomLevel = 1;
+            const maxZoomLevel = 2.0; // Set a maximum zoom level (adjust based on preference)
+            const minZoomLevel = 1.0; // Set a minimum zoom level (adjust as needed)
+            
+            const zoomInButton = document.getElementById('zoom-in');
+            const zoomOutButton = document.getElementById('zoom-out');
+            const graphImg = document.getElementById('graph-img');
+
+            const updateZoom = () => {
+                if (graphImg) {
+                    graphImg.style.transform = `scale(${zoomLevel})`;
+                }
+            };
+
+            zoomInButton.addEventListener('click', () => {
+                if (zoomLevel < maxZoomLevel) { // Check the max zoom limit
+                    zoomLevel += 0.1;
+                    updateZoom();
+                }
+            });
+
+            zoomOutButton.addEventListener('click', () => {
+                if (zoomLevel > minZoomLevel) { // Check the min zoom limit
+                    zoomLevel -= 0.1;
+                    updateZoom();
+                }
+            });
+        }
+// script.js
+document.addEventListener('DOMContentLoaded', function() {
+    const audio = document.getElementById('backgroundMusic');
+    const muteButton = document.getElementById('muteButton');
+    const speakerIcon = document.getElementById('speakerIcon');
+
+    // Play the background music when the page loads
+    audio.play();
+
+    // Set up event listener for the mute button
+    muteButton.addEventListener('click', function() {
+        // Toggle mute
+        if (audio.muted) {
+            audio.muted = false;
+            // Change the icon to the unmuted speaker image
+            speakerIcon.src = 'assets/images/speaker-on.png';  // Change to your unmuted icon
+        } else {
+            audio.muted = true;
+            // Change the icon to the muted speaker image
+            speakerIcon.src = 'assets/images/speaker-off.png'; // Change to your muted icon
+        }
+    });
+});
+    </script>        
+</body>
+</html>

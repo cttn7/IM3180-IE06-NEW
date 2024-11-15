@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Issue Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Add your CSS styles here */
+        body {
+            
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+           
+        }
+        main{
+            flex:1;
+            
+            background-image: url('../assets/images/saveResponse.png');
+        }
+
+        #savedboard2 {
+        padding: 20px;
+        background-color: transparent;
+        
+    }
+    .savedboard {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        width:100%;
+        gap: 20px;
+    }
+    .button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    margin-left: 10px;
+    cursor: pointer;
+}
+    .savedboard-items {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 20px;
+        min-height: 70vh; /* You can adjust the height as needed */
+        
+        padding-right: 10px; /* Add some padding for scroll visibility */
+    }
+    .savedboard-items .item {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        flex: 1 1 calc(16.66%- 40px); /* Set flexible width with a min size */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        
+    }
+    .image-cards{
+    /*display: flex;*/
+    /*flex-direction: column; /* Stack elements vertically */
+    /*align-items: center; /* Center elements horizontally */
+    width: 400px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 16px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    box-sizing: border-box; /* Ensure padding/margin don't affect element width */
+}
+    footer{
+        clear: both;
+    }
+        /* Responsive design for smaller screens */
+    @media (max-width: 1200px) {
+        .savedboard-items .item {
+            flex: 1 1 calc(25% - 40px); /* Adjust to 4 items per row for medium screens */
+        }
+    }
+
+    @media (max-width: 600px) {
+        .savedboard-items .item {
+            flex: 1 1 calc(50% - 40px); /* Full width for 2 item on small screens */
+        }
+    }
+    </style>
+</head>
+<body class="savedResponse-page">
+    <audio id="backgroundMusic" loop autoplay>
+        <source src="music/bgsound.WAV" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+    <header class="savedResponse-header">
+        <nav>
+            <div class="logo">
+                <img src="assets/images/mouse1.png" alt="mouse1Image">
+            </div>
+            <ul>
+                <li>
+                    <button id="muteButton">
+                        <img id="speakerIcon" src="assets/images/speaker-on.png" alt="Speaker Icon" width="20" height="20">
+                    </button>
+                </li>
+                <li><a href="dashboard.html">
+                    <img src="assets/images/dashboardIcon.png" alt="dashboardIcon">
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="savedResponse.html">
+                    <img src="assets/images/analyzeIcon.png" alt="analyzeIcon">
+                    <span>Saved Responses</span></a></li>
+                <li><a href="index.html">
+                    <img src="assets/images/homeIcon.png" alt="homeIcon">
+                    <span>Home</span>
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+<div class="content-wrapper">    
+    <main>
+
+    
+
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Saved Posts</h1>
+        </div>
+    </section>
+
+    <section id="savedboard2">
+        <div class="savedboard`" >
+       
+        <button class="button" id="clear-responses" >CLEAR POSTS</button>
+        <label>
+            <input type="checkbox" name="clear-all" value="${item.id}">
+            CLEAR ALL POSTS
+        </label>
+        <div id="response-list" class="savedboard-items"></div>
+        </div>
+    <!-- Viewed items will be inserted here -->
+        
+        
+        
+    </section>
+<!--
+    <section id="about">
+        <div class="container">
+            <h2>About This Project</h2>
+            <p>This project addresses and focuses on social issues across social media platforms.</p>
+        </div>
+    </section> -->
+</main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Trending Social Issues. All rights reserved.</p>
+        </div>
+    </footer>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Get the element where we want to display the saved responses
+            const responseList = document.getElementById('response-list');
+    
+            function displayPosts(viewedItems) {
+                responseList.innerHTML = ''; // Clear previous content in white box 
+                // Check if there are any viewed items to display
+                if (viewedItems.length === 0) {
+                    responseList.innerHTML = '<p>No responses recorded.</p>';
+                } else {
+                    // Create HTML for each viewed item
+                    viewedItems.forEach(obj => {
+                        const selectedPostId = obj.id;
+                        const dateViewed = obj.timestamp;
+                        console.log("Selected Post ID:", selectedPostId); // Debugging
+    
+                        fetch(`http://localhost:3000/posts/${selectedPostId}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Post not found');
+                                }
+                                return response.json();
+                            })
+                            .then(item => {
+                                // Create HTML structure for each image item
+                                const imageContainer = document.createElement('div');
+                                imageContainer.className = 'image-cards'; // Assign a className for CSS styles
+                                imageContainer.innerHTML = `
+                                 <label>
+                                    <input type="checkbox" name="selected-post" value="${item.id}">
+                                    CLEAR POST
+                                </label>
+
+                                    <a href="dashboard.html" style="text-decoration: none; color: inherit;" onclick="localStorage.setItem('selectedPostId', ${item.id})">
+                                        <h3>${item.title}</h3>
+                                        <img src="${item.image_path}" alt="${item.title}" style="max-width: 100%; height: auto;">
+                                        <p>${item.summary}</p>
+                                        <h4>${dateViewed}</h4>
+                                    </a>
+                                `;
+                                responseList.appendChild(imageContainer);
+                            })
+                            .catch(err => {
+                                console.error('Error fetching data:', err);
+                                const errorDiv = document.createElement('div');
+                                errorDiv.innerHTML = '<p>Error loading data for post ' + selectedPostId + '</p>';
+                                responseList.appendChild(errorDiv);
+                            });
+                    });
+                }
+            }
+    
+            let viewedItems = JSON.parse(localStorage.getItem('viewedItems')) || [];
+
+            // Remove duplicates based on a unique property, such as `id`
+            viewedItems = viewedItems.filter((item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id)
+            );
+
+            // Store the deduplicated array back to localStorage
+            localStorage.setItem('viewedItems', JSON.stringify(viewedItems));
+
+            // Display the posts
+            displayPosts(viewedItems);
+
+
+    
+            // Clear saved responses when the clear button is clicked
+            const clearButton = document.getElementById('clear-responses');
+            clearButton.addEventListener('click', function() {
+                // Check if the "Clear All" checkbox is selected
+            const clearAllCheckbox = document.querySelector('input[name="clear-all"]:checked');
+
+            if (clearAllCheckbox) {
+                // Clear all posts
+                localStorage.removeItem('viewedItems');
+                viewedItems = []; // Clear the local variable as well
+                displayPosts(viewedItems); // Refresh display to show no posts
+            } else {
+                // Clear only the selected posts
+                const selectedCheckboxes = document.querySelectorAll('input[name="selected-post"]:checked');
+                
+
+                if (selectedCheckboxes.length > 0) {
+                    selectedCheckboxes.forEach(selectedCheckbox => {
+                        const selectedPostId = selectedCheckbox.value;
+
+                        // Filter out the selected post from viewedItems
+                        viewedItems = viewedItems.filter(item => item.id !== selectedPostId);
+
+                    });
+                    viewedItems.forEach(item => {
+                        console.log(item);
+                    });
+                    // Update localStorage with the remaining posts
+                    localStorage.setItem('viewedItems', JSON.stringify(viewedItems));
+                    
+                    // Update the display
+                    displayPosts(viewedItems);
+                } else {
+                    alert("Please select a post to clear.");
+                }
+            }
+            });
+        });
+        // script.js
+document.addEventListener('DOMContentLoaded', function() {
+    const audio = document.getElementById('backgroundMusic');
+    const muteButton = document.getElementById('muteButton');
+    const speakerIcon = document.getElementById('speakerIcon');
+
+    // Play the background music when the page loads
+    audio.play();
+
+    // Set up event listener for the mute button
+    muteButton.addEventListener('click', function() {
+        // Toggle mute
+        if (audio.muted) {
+            audio.muted = false;
+            // Change the icon to the unmuted speaker image
+            speakerIcon.src = 'assets/images/speaker-on.png';  // Change to your unmuted icon
+        } else {
+            audio.muted = true;
+            // Change the icon to the muted speaker image
+            speakerIcon.src = 'assets/images/speaker-off.png'; // Change to your muted icon
+        }
+    });
+});
+
+    </script>
+</body>    

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Issue Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <audio id="backgroundMusic" loop autoplay>
+        <source src="music/bgsound.WAV" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <img src="assets/images/loadingScreen.png" alt="Loading...">
+    </div>
+
+    <!-- Fixed Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <img src ="assets/images/mouse1.png" alt="mouse1Image">
+            </div>
+            <ul>
+                <li>
+                    <button id="muteButton">
+                        <img id="speakerIcon" src="assets/images/speaker-on.png" alt="Speaker Icon" width="20" height="20">
+                    </button>
+                </li>
+                <li><a href="dashboard.html">
+                    <img src ="assets/images/dashboardIcon.png" alt="dashboardIcon">
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="savedResponse.html">
+                    <img src="assets/images/analyzeIcon.png" alt="analyzeIcon">
+                    <span>Saved Responses</span></a></li>
+                <li><a href="index.html">
+                    <img src="assets/images/homeIcon.png" alt="homeIcon">
+                    <span>Home</span>
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="mouse-left"></div>
+    <div class="mouse-right"></div>
+
+    <!-- Scrollable Main Content -->
+    <main>    
+        <section id="hero">
+            <div class="hero-content">
+                <h2>Search Social Media Trends</h2>
+                <p>Track and analyze the latest discussions on social issues across multiple platforms.</p>
+                <input type="text" id="search-input" placeholder="Enter query or hashtag...">
+                <button id="search-button">Search</button>
+
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                    <option value="trump">Trump</option>
+                    <option value="tiktokcringe">TikTok Cringe</option>
+                    <option value="ntu">NTU</option>
+                    <option value="sg">Singapore</option>
+                </select>
+
+            </div>
+        </section>
+
+        <section id="dashboard">
+            <div class="container">
+                <h2>Trending Social Issues</h2>
+                <div class="box-container" id="results">
+                    
+                        <!-- <div class="white-box" id="results"></div> -->
+                    
+                </div>
+            </div>
+
+            <div id="about">
+                <div class="container">
+                    <h2>About This Project</h2>
+                    <p>This project addresses and focuses on social issues across social media platforms.</p>
+                </div>
+            </div>
+        </section>  
+    </main>
+
+    <!-- Fixed Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Trending Social Issues. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // JavaScript to hide loading screen after 1.5 seconds on initial load
+        window.onload = function() {
+            setTimeout(function() {
+                document.getElementById('loadingScreen').style.display = 'none'; // Hide loading screen after page load
+            }, 1500); // 1500 milliseconds = 1.5 seconds
+        };
+    
+        // Function to hide loading screen if it's shown (for any reason)
+        function hideLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+    
+        // Trigger search when Enter key is pressed
+        document.getElementById('search-input').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                performSearch(); // Perform search without showing loading screen
+            }
+        });
+    
+        // Search functionality for the search button
+        document.getElementById('search-button').onclick = function() {
+            performSearch(); // Perform search without showing loading screen
+        };
+    
+        // Handle category filter change to auto-fetch data
+        document.getElementById('category-filter').addEventListener('change', function() {
+            performSearch(); // Perform search without showing loading screen
+        });
+    
+        function performSearch() {
+            const searchTerm = document.getElementById('search-input').value.trim();
+            const category = document.getElementById('category-filter').value;
+            let apiUrl = searchTerm ? `http://localhost:3000/search?query=${encodeURIComponent(searchTerm)}` : 'http://localhost:3000/posts';
+    
+            if (category) {
+                apiUrl += (searchTerm ? `&category=${encodeURIComponent(category)}` : `?category=${encodeURIComponent(category)}`);
+            }
+    
+            // Fetch search results or all posts if search term is empty
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    hideLoadingScreen(); // Ensure loading screen is hidden after fetching
+    
+                    // Clear previous results
+                    const resultsContainer = document.getElementById('results');
+                    resultsContainer.innerHTML = '';
+    
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const resultItem = document.createElement('div');
+                            resultItem.classList.add('white-box');
+    
+                            const titleHTML = item.title && item.title !== '-' ? `<h3>${item.title}</h3>` : '';
+                            const imageHTML = item.image_path && item.image_path !== '-' ? `<img src="${item.image_path}" alt="${item.title}" style="max-width: 100%; height: auto;">` : '';
+                            const descriptionHTML = item.description && item.description !== '-' ? `<p>${item.description}</p>` : '';
+                            const summaryHTML = item.summary && item.summary !== '-' ? `<p>${item.summary}</p>` : '';
+    
+                            resultItem.innerHTML = `
+                                <a href="dashboard.html" style="text-decoration: none; color: inherit;" onclick="localStorage.setItem('selectedPostId', ${item.id})">
+                                    ${titleHTML}
+                                    ${imageHTML}
+                                    ${descriptionHTML}
+                                    ${summaryHTML}
+                                </a>
+                            `;
+    
+                            resultsContainer.appendChild(resultItem);
+                        });
+                    } else {
+                        if (searchTerm || category) {
+                            resultsContainer.innerHTML = '<div class="white-box"><p>No results found.</p></div>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    hideLoadingScreen(); // Ensure loading screen is hidden on error
+                    console.error('Error fetching search results:', error);
+                    document.getElementById('results').innerHTML = '<p>Error fetching results. Please try again later.</p>';
+                });
+        }
+    </script>
+    
+    
+    
+</body>
+</html>

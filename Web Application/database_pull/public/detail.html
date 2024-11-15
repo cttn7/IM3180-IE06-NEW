@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Detail</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title"></h1>
+    <img id="image" alt="">
+    <p id="description"></p>
+    <p id="link"></p>
+    <h3>Summary</h3>
+    <p id="summary"></p>
+    <h3>Top Comments</h3>
+    <p id="topcomment"></p>
+    <h3>Negative Comments</h3>
+    <p id="negative"></p>
+    <h3>Positive Comments</h3>
+    <p id="positive"></p>
+    <h3>Neutral Comments</h3>
+    <p id="neutral"></p>
+    <img id="graph" alt="Graph" style="display: none;"> <!-- Optional graph display -->
+    <a href="index.html">Back to Gallery</a>
+
+    <script>
+        // Function to get query parameters from the URL
+        function getQueryParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const regex = /([^&=]+)=([^&]*)/g;
+            let m;
+
+            while (m = regex.exec(queryString)) {
+                params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+            }
+            return params;
+        }
+
+        // Fetch the item details based on the ID in the query parameters
+        const params = getQueryParams();
+        const itemId = params.id;
+
+        console.log("Item ID:", itemId); // Log the item ID
+        
+        // Fetch the post details from the API
+        fetch(`http://localhost:3000/images/${itemId}`) // Ensure this matches your API endpoint
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data) {
+                    document.getElementById('title').innerText = data.title;
+                    document.getElementById('image').src = data.image_path;
+                    document.getElementById('link').innerText = data.description || 'No description available.';
+                    document.getElementById('description').innerText = data.description || 'No description available.';
+                    document.getElementById('summary').innerText = data.summary || 'No summary available.';
+                    document.getElementById('topcomment').innerText = data.topcomment || 'No top comment available.';
+                    document.getElementById('negative').innerText = data.negative || 'No negative comments available.';
+                    document.getElementById('positive').innerText = data.positive || 'No positive comments available.';
+                    document.getElementById('neutral').innerText = data.neutral || 'No neutral comments available.';
+                    document.getElementById('graph').src = data.graph_path;
+                  
+                   // if (data.graph_path) {
+                    //    document.getElementById('graph').src = data.graph_path; // Set the graph image source
+                   //     document.getElementById('graph').style.display = 'block'; // Show the graph image
+                  //  }
+                } else {
+                    document.getElementById('title').innerText = 'Post not found';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching post details:', error);
+                document.getElementById('title').innerText = 'Error fetching details';
+            });
+    </script>
+</body>
+</html>

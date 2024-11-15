@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Issue Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #dashboard {
+            display: grid;
+            grid-template-columns: 70% 30%; /* 70% for left, 30% for right */
+            gap: 20px; /* Adds space between grid items */
+            padding: 20px;
+        }
+
+        .quarter {
+            background-color: #f4f4f4; /* Light gray background for each quarter */
+            padding: 20px;
+            border: 1px solid #ddd; /* Light border */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            #dashboard {
+                grid-template-columns: 1fr; /* Stack in a single column on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="assets/images/mouse1.png" alt="mouse1Image">
+            </div>
+            <ul>
+                <li><a href="dashboard.html">
+                    <img src="assets/images/dashboardIcon.png" alt="dashboardIcon">
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="saveResponse.html">
+                    <img src="assets/images/analyzeIcon.png" alt="analyzeIcon">
+                    <span>My Saved Responses</span></a></li>
+                <li><a href="index.html">
+                    <img src="assets/images/homeIcon.png" alt="homeIcon">
+                    <span>Home</span>
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Dashboard</h1>
+        </div>
+    </section>
+
+    <section id="dashboard2">
+        <div class="quarter" id="left-quarter">
+            <h2>Post Details</h2>
+            <p>Content for the left quarter will be populated here.</p>
+        </div>
+        <div class="quarter">
+            <div class="right-upper">
+                <h2>Recent Posts</h2>
+                <p>Content for the upper right segment goes here.</p>
+            </div>
+            <div class="right-lower">
+                <h2>Chatbot</h2>
+                <p>Content for the lower right segment goes here.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2>About This Project</h2>
+            <p>This project addresses and focuses on social issues across social media platforms.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Trending Social Issues. All rights reserved.</p>
+        </div>
+    </footer>
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+    
+   
+    <!-- Add your script here -->
+       <!-- Add your script here -->
+       <script>
+        // Function to get the selected post ID from localStorage
+        const selectedPostId = localStorage.getItem('selectedPostId');
+        console.log("Selected Post ID:", selectedPostId); // Debugging
+
+        // Check if a post ID is available
+        if (!selectedPostId) {
+            console.error('No post ID found in localStorage.');
+            document.getElementById('left-quarter').innerHTML = '<p>No post selected. Please select a post to view details.</p>';
+        } else {
+            // Fetch post details from the API
+            fetch(`http://localhost:3000/posts/${selectedPostId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) {
+                        document.getElementById('left-quarter').innerHTML = '<p>Post not found.</p>';
+                    } else {
+                        // Populate the left quarter with post details
+                        const leftQuarter = document.getElementById('left-quarter');
+                        leftQuarter.innerHTML = `
+                            <h2>${data.title || 'No title available'}</h2>
+                            <img src="${data.image_path || 'assets/images/default-image.jpg'}" alt="${data.title}" style="max-width: 100%; height: auto;">
+                            <p><strong>Description:</strong> ${data.description || 'No description available.'}</p>
+                            <p><strong>Link to original post:</strong> <a href="${data.link}" target="_blank">${data.link || 'No link available'}</a></p>
+                            <p><strong>Summary:</strong> ${data.summary || 'No summary available.'}</p>
+                            <h3>Top Comments</h3>
+                            <p>${data.topcomment || 'No top comment available.'}</p>
+                            <h3>Negative Comments</h3>
+                            <p>${data.negative || 'No negative comments available.'}</p>
+                            <h3>Positive Comments</h3>
+                            <p>${data.positive || 'No positive comments available.'}</p>
+                            <h3>Neutral Comments</h3>
+                            <p>${data.neutral || 'No neutral comments available.'}</p>
+                            <h3>Graph</h3>
+                            <p>AI learning model analytics</p>
+                            <div style="text-align: center;">
+                                <button id="zoom-in" style="margin-right: 10px;">+</button>
+                                <button id="zoom-out">-</button>
+                            </div>
+                            <img class="graph-image" id="graph-img" src="${data.graph_path || 'assets/graphs/default-image.jpg'}" alt="${data.title}" style="max-width: 100%; height: auto;">
+                        `;
+                        initZoomFunctionality();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching post details:', error);
+                    document.getElementById('left-quarter').innerHTML = '<p>Error fetching details. Please try again later.</p>';
+                });
+        }
+
+
+         function initZoomFunctionality() {
+            let zoomLevel = 1;
+            const zoomInButton = document.getElementById('zoom-in');
+            const zoomOutButton = document.getElementById('zoom-out');
+            const graphImg = document.getElementById('graph-img');
+
+            const updateZoom = () => {
+                if (graphImg) {
+                    graphImg.style.transform = `scale(${zoomLevel})`;
+                }
+            };
+
+            zoomInButton.addEventListener('click', () => {
+                zoomLevel += 0.1;
+                updateZoom();
+            });
+
+            zoomOutButton.addEventListener('click', () => {
+                if (zoomLevel > 0.1) {
+                    zoomLevel -= 0.1;
+                    updateZoom();
+                }
+            });
+        }
+    </script>        
+</body>
+</html>
